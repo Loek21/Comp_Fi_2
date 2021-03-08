@@ -50,16 +50,29 @@ def sim(n, m, K) -> tuple:
 
     ari_error = np.std(ari_values) / np.sqrt(n)
     geo_error = np.std(geo_values) / np.sqrt(n)
+    ari_var = np.var(ari_values)
+    geo_var = np.var(geo_values)
 
     # Optimal coefficient for Control variate
     covariance_matrix = np.cov(geo_values, ari_values)
-    c = covariance_matrix[0, 1] / np.var(geo_values)
+    c = -covariance_matrix[0, 1] / np.var(geo_values)
 
-    control_variate = C_arithmetic - c * (
+    control_error = np.sqrt(
+        ari_var + c ** 2 * geo_var + 2 * c * covariance_matrix[0, 1]
+    ) / np.sqrt(n)
+
+    control_variate = C_arithmetic + c * (
         C_geometric - asianGeometricOption(S0, T, m, K)
     )
 
-    return C_arithmetic, C_geometric, control_variate, ari_error, geo_error
+    return (
+        C_arithmetic,
+        C_geometric,
+        control_variate,
+        ari_error,
+        geo_error,
+        control_error,
+    )
 
 
 # Geometric Asian option
@@ -93,17 +106,41 @@ temp_cont = []
 temp_ari = []
 temp_geo = []
 
+cont_error, ari_error, geo_error = [], [], []
+
 for m in tqdm(m_list):
-    arithmetic, geometric, control_variate, ari_error, geo_error = sim(n, m, K)
+    arithmetic, geometric, control_variate, error_ari, error_geo, control_error = sim(
+        n, m, K
+    )
     temp_cont.append(control_variate)
     temp_ari.append(arithmetic)
     temp_geo.append(geometric)
 
+    cont_error.append(control_error)
+    ari_error.append(error_ari)
+    geo_error.append(error_geo)
 
 plt.plot(m_list, temp_cont, label=f"Control K = {K}")
+plt.fill_between(
+    m_list,
+    np.array(temp_cont) - np.array(cont_error),
+    np.array(temp_cont) + np.array(cont_error),
+    alpha=0.3,
+)
 plt.plot(m_list, temp_ari, label=f"Arithmetic K = {K}")
+plt.fill_between(
+    m_list,
+    np.array(temp_ari) - np.array(ari_error),
+    np.array(temp_ari) + np.array(ari_error),
+    alpha=0.3,
+)
 plt.plot(m_list, temp_geo, label=f"Geometric K = {K}")
-
+plt.fill_between(
+    m_list,
+    np.array(temp_geo) - np.array(geo_error),
+    np.array(temp_geo) + np.array(geo_error),
+    alpha=0.3,
+)
 
 plt.xlabel("m", fontsize=22)
 plt.ylabel("Option price", fontsize=25)
@@ -120,16 +157,40 @@ m = 80  # Samples or number of paths
 temp_cont = []
 temp_ari = []
 temp_geo = []
+cont_error, ari_error, geo_error = [], [], []
 
 for n in tqdm(n_list):
-    arithmetic, geometric, control_variate, ari_error, geo_error = sim(n, m, K)
+    arithmetic, geometric, control_variate, error_ari, error_geo, control_error = sim(
+        n, m, K
+    )
     temp_cont.append(control_variate)
     temp_ari.append(arithmetic)
     temp_geo.append(geometric)
+    cont_error.append(control_error)
+    ari_error.append(error_ari)
+    geo_error.append(error_geo)
 
 plt.plot(n_list, temp_cont, label=f"Control K = {K}")
+plt.fill_between(
+    n_list,
+    np.array(temp_cont) - np.array(cont_error),
+    np.array(temp_cont) + np.array(cont_error),
+    alpha=0.3,
+)
 plt.plot(n_list, temp_ari, label=f"Arithmetic K = {K}")
+plt.fill_between(
+    n_list,
+    np.array(temp_ari) - np.array(ari_error),
+    np.array(temp_ari) + np.array(ari_error),
+    alpha=0.3,
+)
 plt.plot(n_list, temp_geo, label=f"Geometric K = {K}")
+plt.fill_between(
+    n_list,
+    np.array(temp_geo) - np.array(geo_error),
+    np.array(temp_geo) + np.array(geo_error),
+    alpha=0.3,
+)
 
 
 plt.xlabel("n", fontsize=25)
@@ -142,7 +203,7 @@ plt.legend()
 plt.show()
 
 
-# Compare geometric and arithmetic asian option as function of n
+# # Compare geometric and arithmetic asian option as function of n
 K_list = np.arange(79, 140, 20)
 n_list = np.arange(1000, 101000, 5000)
 
@@ -157,7 +218,14 @@ for K in K_list:
 
     for n in tqdm(n_list):
 
-        arithmetic, geometric, control_variate, ari_error, geo_error = sim(n, m, K)
+        (
+            arithmetic,
+            geometric,
+            control_variate,
+            error_ari,
+            error_geo,
+            contorl_error,
+        ) = sim(n, m, K)
         temp_diff2.append(abs(geometric - arithmetic))
         temp_cont2.append(abs(control_variate - arithmetic))
 
