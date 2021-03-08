@@ -44,7 +44,6 @@ with open('bump_reval_difseed.csv') as f:
             elif row[1] == '0.5':
                 digital['0.5'].append((float(row[2]), float(row[3]), float(row[4])))
 
-
 # plot the data
 if option_type == 'put':
     fig = plt.figure(figsize=(8,5))
@@ -61,7 +60,6 @@ if option_type == 'put':
     ax.set_title("Convergence of MC simulation in determining put option delta")
     plt.axhline(y=-0.3262644882651039, color='black', ls='--', lw=0.7)
     plt.legend()
-    #fig.savefig("mc_convergence_test.jpg")
     plt.show()
 
 
@@ -80,7 +78,6 @@ if option_type == 'put':
     ax.set_title("Relative error between MC simulation and analytical value")
     plt.axhline(y=0, color='black', ls='--', lw=0.7)
     plt.legend()
-    #fig.savefig("mc_convergence_test.jpg")
     plt.show()
 
 else:
@@ -98,7 +95,6 @@ else:
     ax.set_title("Convergence of MC simulation in determining digital option delta")
     plt.axhline(y=0.018206369779490493, color='black', ls='--', lw=0.7)
     plt.legend()
-    #fig.savefig("mc_convergence_test.jpg")
     plt.show()
 
 
@@ -117,6 +113,5 @@ else:
     ax.set_title("Relative error between MC simulation and analytical value")
     plt.axhline(y=0, color='black', ls='--', lw=0.7)
     plt.legend()
-    #fig.savefig("mc_convergence_test.jpg")
     plt.show()
 

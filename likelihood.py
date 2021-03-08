@@ -25,25 +25,12 @@ def delta_montecarlo_likelihood():
 
     return delta
 
-# do monte carlo sim for the delta parameter
-deltas_avg = []
-for x in range(10):
-    delta_list = []
-    for i in range(10000):
-        delta = delta_montecarlo_likelihood()
-        delta_list.append(delta)
-
-    delta_param = np.mean(delta_list)
-    #print(np.mean(delta_list), np.std(delta_list))
-
-    deltas_avg.append(delta_param)
-
-
 def run_sim_likelihood(n_trials):
-# do monte carlo sim for the delta parameter
-    
+    # do monte carlo sim for the delta parameter
     delta_list = []
     for _ in range(n_trials):
+        
+        # get the delta
         delta_list.append(delta_montecarlo_likelihood())
 
     delta_param = np.mean(delta_list)
@@ -52,11 +39,14 @@ def run_sim_likelihood(n_trials):
 
 if __name__=="__main__":
 
+    # open a new file and save data there
     file_aux  = open(f'likelihood.csv','a')
     file_aux.write("n_trials delta_mean delta_sterr")
     trials_list = [10, 100, 1000, 10000, 100000, 1000000]
     for trials in trials_list:
         delta_list = []
+
+        # parallel computing
         with concurrent.futures.ProcessPoolExecutor(max_workers=12) as executor:
             values = [executor.submit(run_sim_likelihood, trials) for _ in range(100)]
             for f in concurrent.futures.as_completed(values):
@@ -67,10 +57,3 @@ if __name__=="__main__":
         file_aux  = open(f'likelihood.csv','a')
         file_aux.write("\n"+str(trials)+" "+str(delta_mean)+" "+str(delta_sterr))
     file_aux.close()
-
-
-    final_delta = np.mean(deltas_avg)
-    analytical_de_dig = 0.018206369779490493
-    print("DELTA: ",final_delta)
-    relative_err = abs(final_delta-analytical_de_dig)/analytical_de_dig
-    print(relative_err*100)

@@ -30,7 +30,6 @@ ax.set_ylabel("Digital option delta")
 ax.set_xscale('log')
 ax.set_title("Convergence of MC simulation in determining digital option delta")
 plt.axhline(y=0.018206369779490493, color='black', ls='--', lw=0.7)
-#fig.savefig("mc_convergence_test.jpg")
 plt.show()
 
 
@@ -46,6 +45,5 @@ ax.set_ylabel("Digital option delta relative error (%)")
 ax.set_xscale('log')
 ax.set_title("Relative error between MC simulation and analytical value")
 plt.axhline(y=0, color='black', ls='--', lw=0.7)
-#fig.savefig("mc_convergence_test.jpg")
 plt.show()
 

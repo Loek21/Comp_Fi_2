@@ -25,10 +25,11 @@ def delta_montecarlo(a):
     return delta
 
 def run_sim_pathwise(n_trials, smoothing):
-# do monte carlo sim for the delta parameter
-    
+    # do monte carlo sim for the delta parameter
     delta_list = []
     for _ in range(n_trials):
+
+        # get deltas
         delta_list.append(delta_montecarlo(smoothing))
 
     delta_param = np.mean(delta_list)
@@ -36,13 +37,15 @@ def run_sim_pathwise(n_trials, smoothing):
     return delta_param
 
 if __name__=="__main__":
-
+    # open file and save data there
     file_aux  = open(f'pathwise.csv','a')
-    #file_aux.write("smoothing n_trials delta_mean delta_sterr")
+    file_aux.write("smoothing n_trials delta_mean delta_sterr")
     trials_list = [10, 100, 1000, 10000, 100000, 1000000]
     for smoothing in [4,5]:
         for trials in trials_list:
             delta_list = []
+
+            # parallel computing
             with concurrent.futures.ProcessPoolExecutor(max_workers=12) as executor:
                 values = [executor.submit(run_sim_pathwise, trials, smoothing) for _ in range(100)]
                 for f in concurrent.futures.as_completed(values):
@@ -53,8 +56,3 @@ if __name__=="__main__":
             file_aux  = open(f'pathwise.csv','a')
             file_aux.write("\n"+str(smoothing)+" "+str(trials)+" "+str(delta_mean)+" "+str(delta_sterr))
     file_aux.close()
-
-
-    analytical_de_dig = 0.018206369779490493
-    #relative_err = abs(final_delta-analytical_de_dig)/analytical_de_dig
-    #print(relative_err*100)
